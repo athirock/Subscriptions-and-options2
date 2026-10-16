@@ -178,7 +178,7 @@ function zoneSectionHtml(section){
   const rowClass = section.leadingSpacer ? 'plan-attrs-row plan-attrs-row--compact' : 'plan-attrs-row';
   return `
   <div class="plan-zone-section">
-    <a class="plan-zone-link" href="${ROAMING_INFO_URL}" target="_blank" rel="noopener" onclick="openZonesDrawer(event)">${section.zoneLabel} ${ICON_EXTERNAL}</a>
+    <a class="plan-zone-link" href="#" role="button" onclick="openZonesDrawer(event)">${section.zoneLabel}</a>
     <div class="${rowClass}">${attrsHtml}</div>
   </div>`;
 }
@@ -444,8 +444,12 @@ function deselectIntl(){
   renderStep2();
 }
 
-function roamingLink(label){
-  return `<a href="${ROAMING_INFO_URL}" target="_blank" rel="noopener" onclick="openZonesDrawer(event)">${label}</a>`;
+// Destination links open the "Different zones" overlay only (no new tab). Pass newTab=true for the
+// links that must open the roaming page in a new browser tab instead.
+function roamingLink(label, newTab){
+  return newTab
+    ? `<a href="${ROAMING_INFO_URL}" target="_blank" rel="noopener">${label}${ICON_EXTERNAL}</a>`
+    : `<a href="#" role="button" onclick="openZonesDrawer(event)">${label}</a>`;
 }
 
 function zoneLabelFor(zones){
@@ -481,8 +485,8 @@ function roamingComboCardHtml(p){
   const displayAttrs = p.attrs.map(a => ({...a, value: scaleAttrValue(a.value, qty)}));
   const qtyHtml = checked ? `
     <div class="qty-stepper" onclick="event.stopPropagation();">
-      <span class="qty-label">Number of bundles</span>
-      <span class="qty-info" tabindex="0"><span class="qty-info-glyph">i</span><span class="qty-tooltip">You can add this option more than once. Each extra bundle adds on top of what you already have, and the price adapts accordingly.</span></span>
+      <span class="qty-label">Quantity</span>
+      <span class="qty-info" tabindex="0"><span class="qty-info-glyph">i</span><span class="qty-tooltip">You can add this option more than once. Each extra unit adds on top of what you already have, the price will also adapt accordingly.</span></span>
       <button class="qty-btn${qty>1?' enabled':''}" ${qty<=1?'disabled':''} onclick="changeQty('${p.id}',-1)">${ICON_MINUS}</button>
       <div class="qty-value">${qty}</div>
       <button class="qty-btn enabled" ${qty>=20?'disabled':''} onclick="changeQty('${p.id}',1)">${ICON_PLUS}</button>
@@ -546,7 +550,7 @@ function zonesInfoCardHtml(){
   <div class="zones-info-card">
     <div class="zones-info-header">
       <span class="zones-info-title">Different zones</span>
-      ${roamingLink('View all countries in detail for each zone ↗')}
+      ${roamingLink('View all countries in detail for each zone', true)}
     </div>
     <div class="zones-info-grid">
       <div class="zones-info-col">
@@ -655,30 +659,13 @@ function renderStep2(){
 
 
 // ===== Zones slide-over ("Good to know" panel) =====
-// Destination links open a right-hand slide-over. Two modes:
-//   'iframe' (default, for GitHub Pages / real hosting): embeds the live proximus.be roaming page and
-//            lands on the "Good to know" section via the #/zones anchor in ROAMING_INFO_URL.
-//   'native': renders the zone explanations inline (used by the Claude artifact, whose sandbox blocks iframes).
+// Destination links open a centered overlay (modal) that embeds the live proximus.be roaming-rates page and lands on
+// the "Good to know" section through the #/zones anchor in ROAMING_INFO_URL.
 // proximus.be sends no X-Frame-Options / CSP frame-ancestors header, so framing is allowed.
-const ZONES_PANEL_MODE = 'iframe';
-
+// (Claude's artifact preview sandbox blocks iframes, so the embed only renders when hosted, e.g. on GitHub Pages.)
 let zonesDrawerLastFocus = null;
 function zonesPanelBodyHtml(){
-  if(ZONES_PANEL_MODE === 'iframe'){
-    return `<div class="drawer-body drawer-body--frame"><iframe id="zones-drawer-frame" title="Roaming zones and rates" referrerpolicy="origin-when-cross-origin"></iframe></div>`;
-  }
-  return `<div class="drawer-body">
-        <h3 class="drawer-subtitle">The different zones we use</h3>
-        <p class="drawer-intro">Roaming costs depend on your destination. See how we group countries for calls, texts and data.</p>
-        <div class="drawer-zone"><h3>EU Zone</h3><p>Call, text and surf at the same rate as in Belgium.</p>
-          <ul><li class="yes">UK, Norway, Monaco and Andorra among others included</li><li class="no">Not valid for destinations outside the EU Zone</li></ul></div>
-        <div class="drawer-zone"><h3>Top destinations</h3><p>Travel to popular destinations outside the EU Zone.</p>
-          <ul><li class="yes">Switzerland, USA, China, Canada and Turkey among others included</li><li class="no">EU Zone rates do not apply</li></ul></div>
-        <div class="drawer-zone"><h3>Rest of the world</h3><p>Travel outside the EU Zone to countries that are not part of top destinations.</p>
-          <ul><li class="yes">All other destinations outside the EU Zone and top destinations</li><li class="no">Exception zone countries not included</li></ul></div>
-        <p class="drawer-note">Top destinations and the rest of the world form the worldwide zone.</p>
-        <p class="drawer-note">Countries in the exception zone are not part of these zones and have higher roaming rates.</p>
-      </div>`;
+  return `<div class="drawer-body drawer-body--frame"><iframe id="zones-drawer-frame" title="Roaming zones and rates" referrerpolicy="origin-when-cross-origin"></iframe></div>`;
 }
 function ensureZonesDrawer(){
   let d = document.getElementById('zones-drawer');
@@ -691,12 +678,13 @@ function ensureZonesDrawer(){
     <div class="drawer-backdrop" onclick="closeZonesDrawer()"></div>
     <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="zones-drawer-title">
       <div class="drawer-header">
-        <h2 id="zones-drawer-title">Good to know: roaming zones</h2>
+        <h2 id="zones-drawer-title">Different zones</h2>
         <button class="drawer-close" type="button" aria-label="Close" onclick="closeZonesDrawer()">${ICON_X}</button>
       </div>
       ${zonesPanelBodyHtml()}
       <div class="drawer-footer">
-        <a class="btn btn-secondary" href="${ROAMING_INFO_URL}" target="_blank" rel="noopener">${ZONES_PANEL_MODE==='iframe' ? 'Open in a new tab' : 'See all countries per zone'} ${ICON_EXTERNAL}</a>
+        <button class="drawer-cancel" type="button" onclick="closeZonesDrawer()">Cancel</button>
+        <a class="btn btn-secondary" href="${ROAMING_INFO_URL}" target="_blank" rel="noopener">Open in a new tab ${ICON_EXTERNAL}</a>
       </div>
     </aside>`;
   document.body.appendChild(d);

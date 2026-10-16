@@ -369,39 +369,60 @@
   footer a{color:#fff;text-decoration:none;opacity:.9;}
   footer .bottom{border-top:1px solid rgba(255,255,255,.25);max-width:1180px;margin:0 auto;padding-top:20px;opacity:.85;}
 
-/* ===== Right-hand slide-over (Good to know: roaming zones) ===== */
-.drawer{position:fixed;inset:0;z-index:100;visibility:hidden;pointer-events:none;}
+/* ===== "Different zones" modal — Lavender Modal (Figma Lavender - Core Library, node 3362:53823) =====
+   Tokens: overlay #000000cc, surface #f9f9f9, radius/main 8, padding/m 24, Heading/title-l 20/30 bold brand #5c2d91,
+   border/default #0000001f (2px separator), button height 44, radius/button-small 3 + radius/button-big 22, Shadow/l. */
+.drawer{position:fixed;inset:0;z-index:100;visibility:hidden;pointer-events:none;display:flex;align-items:center;justify-content:center;padding:24px;}
 .drawer.open{visibility:visible;pointer-events:auto;}
-.drawer-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;transition:opacity .2s ease;}
+.drawer-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.8);opacity:0;transition:opacity .2s ease;}
 .drawer.open .drawer-backdrop{opacity:1;}
-.drawer{display:flex;align-items:center;justify-content:center;padding:24px;}
 .drawer-panel{
-  position:relative;width:min(960px,100%);height:min(780px,100%);background:#fff;display:flex;flex-direction:column;
-  border-radius:var(--radius-main);overflow:hidden;box-shadow:0 16px 40px -8px rgba(0,0,0,.35);
+  position:relative;width:min(960px,100%);height:min(780px,100%);background:#f9f9f9;display:flex;flex-direction:column;
+  padding:24px;gap:24px;border-radius:var(--radius-main);overflow:hidden;box-shadow:0 10px 15px -3px rgba(37,37,37,.08);
   opacity:0;transform:translateY(16px);transition:opacity .2s ease, transform .2s ease;
 }
 .drawer.open .drawer-panel{opacity:1;transform:translateY(0);}
-.drawer-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;border-bottom:2px solid var(--border);}
-.drawer-header h2{margin:0;font-size:20px;line-height:28px;font-weight:800;color:var(--purple);}
+.drawer-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.drawer-header h2{margin:0;font-size:20px;line-height:30px;font-weight:700;color:var(--purple);}
+/* Lavender "Button icon": 24px circle, container/secondary fill, 12px brand icon; hit area extended to 44px */
 .drawer-close{
-  width:40px;height:40px;border:none;border-radius:50%;background:var(--purple-tint);color:var(--purple);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  position:relative;width:24px;height:24px;margin-top:3px;padding:0;border:none;border-radius:var(--radius-pill);background:var(--purple-tint);
+  color:var(--purple);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
+.drawer-close::after{content:'';position:absolute;inset:-10px;}
 .drawer-close:hover{background:rgba(92,45,145,.28);}
-.drawer-close svg{width:16px;height:16px;}
-.drawer-body{flex:1;min-height:0;overflow:auto;padding:24px;display:flex;flex-direction:column;gap:20px;}
-.drawer-footer{padding:16px 24px;border-top:2px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:24px;}
-.drawer-cancel{color:#0a0a0a;font-weight:400;font-size:16px;line-height:24px;text-decoration:underline;background:none;border:none;padding:0;cursor:pointer;font-family:inherit;}
-.drawer-cancel:hover{color:var(--purple);}
-.drawer-footer .btn{text-decoration:none;}
-.drawer-footer .btn svg{width:16px;height:16px;}
+.drawer-close svg{width:12px;height:12px;}
+/* Slot content: embedded roaming page */
+.drawer-body{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:20px;}
+.drawer-body--frame{overflow:hidden;display:block;border:1px solid var(--border);border-radius:var(--radius-main);background:#fff;}
+.drawer-body--frame iframe{width:100%;height:100%;border:0;background:#fff;display:block;}
+/* Separator (2px, border/default) with 24px gap on both sides */
+.drawer-separator{flex:none;height:2px;margin:0;border:0;background:var(--border);}
+/* Action frame: right-aligned, 16px gap, 44px tall buttons */
+.drawer-footer{flex:none;display:flex;align-items:center;justify-content:flex-end;gap:16px;}
+.drawer-cancel,.drawer-primary{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 24px;border:none;cursor:pointer;
+  font-family:inherit;font-size:16px;line-height:24px;font-weight:700;text-decoration:none;color:var(--purple);
+}
+/* Button 3 (tertiary): text only */
+.drawer-cancel{background:none;padding:10px 8px;border-radius:3px;}
+.drawer-cancel:hover{background:var(--purple-tint);}
+/* Button 1 (primary): last solid button keeps the big bottom-right corner */
+.drawer-primary{background:var(--purple);color:#fff;border-radius:3px 3px 22px 3px;}
+.drawer-primary:hover{background:#4a2475;}
+.drawer-primary svg{width:16px;height:16px;flex:none;}
+.drawer-close:focus-visible,.drawer-cancel:focus-visible,.drawer-primary:focus-visible{outline:2px solid var(--purple);outline-offset:2px;}
+/* Mobile: buttons stack full width, primary first, tertiary last and centred */
+@media (max-width:640px){
+  .drawer{padding:16px;}
+  .drawer-panel{height:min(780px,100%);}
+  .drawer-footer{flex-direction:column-reverse;align-items:stretch;gap:16px;}
+  .drawer-primary{width:100%;}
+  .drawer-cancel{width:100%;}
+}
 @media (prefers-reduced-motion:reduce){
   .drawer-backdrop,.drawer-panel{transition:none;}
 }
-
-
-.drawer-body--frame{padding:0;overflow:hidden;display:block;background:var(--container);}
-.drawer-body--frame iframe{width:100%;height:100%;border:0;background:#fff;display:block;}
 
 /* Links that open in a new tab / side panel carry a trailing external-link icon */
 .plan-available a svg,.zones-info-header a svg{width:14px;height:14px;margin-left:4px;vertical-align:-2px;}

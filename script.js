@@ -682,9 +682,10 @@ function ensureZonesDrawer(){
         <button class="drawer-close" type="button" aria-label="Close" onclick="closeZonesDrawer()">${ICON_X}</button>
       </div>
       ${zonesPanelBodyHtml()}
+      <hr class="drawer-separator">
       <div class="drawer-footer">
         <button class="drawer-cancel" type="button" onclick="closeZonesDrawer()">Cancel</button>
-        <a class="btn btn-secondary" href="${ROAMING_INFO_URL}" target="_blank" rel="noopener">Open in a new tab ${ICON_EXTERNAL}</a>
+        <a class="drawer-primary" href="${ROAMING_INFO_URL}" target="_blank" rel="noopener">Open in a new tab ${ICON_EXTERNAL}</a>
       </div>
     </aside>`;
   document.body.appendChild(d);

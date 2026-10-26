@@ -95,8 +95,8 @@ const CATEGORY_LABELS = {voice:'Data + Voice + SMS', data:'Only data subscriptio
 const filterDefs = [
   {id:'negotiated', label:'Negotiated', test:p=>p.negotiated},
   {id:'voice', label:'Data + Voice + SMS', test:p=>p.category==='voice'},
-  {id:'data', label:'Only Data', test:p=>p.category==='data'},
-  {id:'100gb', label:'100GB or more', test:p=>p.gb>=100},
+  {id:'data', label:'Only Data subscriptions', test:p=>p.category==='data'},
+  {id:'100gb', label:'For high data use (100GB+)', test:p=>p.gb>=100},
 ];
 
 let activeFilters = new Set();
@@ -244,7 +244,7 @@ function plansResultsHtml(){
 
 function renderStep1Picker(){
   const chipsHtml = filterDefs.map(f=>
-    `<div class="chip${activeFilters.has(f.id)?' active':''}" onclick="toggleFilter('${f.id}')">${f.label}</div>`
+    `<div class="chip${activeFilters.has(f.id)?' active':''}"${f.hint?` title="${f.hint}"`:''} onclick="toggleFilter('${f.id}')">${f.label}</div>`
   ).join('');
 
   document.getElementById('step1-panel').innerHTML = `
